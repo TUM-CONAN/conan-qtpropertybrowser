@@ -38,10 +38,16 @@ CONFIG += conan_basic_setup
 include(../../conanbuildinfo.pri)"""
             )
         self.run( "cd %s && qmake CONFIG+=debug_and_release" % folder_name, run_environment=True)
-        if self.settings.build_type == "Debug":
-            self.run( "cd %s && make debug" % folder_name, run_environment=True )
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.build_type == "Debug":
+                self.run( "cd %s && nmake debug" % folder_name, run_environment=True )
+            else:
+                self.run( "cd %s && nmake release" % folder_name, run_environment=True )
         else:
-            self.run( "cd %s && make release" % folder_name, run_environment=True )
+            if self.settings.build_type == "Debug":
+                self.run( "cd %s && make debug" % folder_name, run_environment=True )
+            else:
+                self.run( "cd %s && make release" % folder_name, run_environment=True )
 
     def package(self):
         self.copy(pattern="*.h", dst="include", src=os.path.join("source", "qtpropertybrowser", "src"))
