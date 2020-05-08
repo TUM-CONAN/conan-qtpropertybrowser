@@ -41,6 +41,17 @@ class QuickQanavaBrowserConan(ConanFile):
             )
         cmake = self._cmake_configure()
         cmake.build()
+        # self.run( "cd %s && qmake CONFIG+=debug_and_release" % folder_name, run_environment=True)
+        # if self.settings.compiler == "Visual Studio":
+        #     if self.settings.build_type == "Debug":
+        #         self.run( "cd %s && nmake debug" % folder_name, run_environment=True )
+        #     else:
+        #         self.run( "cd %s && nmake release" % folder_name, run_environment=True )
+        # else:
+        #     if self.settings.build_type == "Debug":
+        #         self.run( "cd %s && make debug" % folder_name, run_environment=True )
+        #     else:
+        #         self.run( "cd %s && make release" % folder_name, run_environment=True )
 
     def package(self):
         cmake = self._cmake_configure()
