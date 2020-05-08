@@ -1,18 +1,18 @@
-from conans import ConanFile, tools
+from conans import ConanFile, CMake, tools
 import os
 import shutil
 
-class QtPropertyBrowserConan(ConanFile):
-    name = "qt-propertybrowser"
+class QuickQanavaBrowserConan(ConanFile):
+    name = "qt-quickqanava"
     version = "1.0"
-    generators = "qmake"
+    generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {"shared": [True, False]}
     default_options = "shared=True"
 
-    license = "Copyright ??"
-    description = "collection of qt widgets"
+    license = "Copyright benoit@destrat.io BSD"
+    description = "C++14 network/graph visualization library / Qt node editor."
 
     requires = (
             "qt/5.12.4-r2@camposs/stable",
@@ -21,33 +21,40 @@ class QtPropertyBrowserConan(ConanFile):
     scm = {
         "type": "git",
         "subfolder": "source",
-        "url": "https://github.com/ulricheck/qt-solutions.git",
+        "url": "https://github.com/ulricheck/QuickQanava.git",
         "revision": "master",
         "submodule": "recursive",
     }
 
+    def _cmake_configure(self):
+        cmake = CMake(self)
+        cmake.definitions["BUILD_SAMPLES"] = 'ON'
+        cmake.definitions["BUILD_STATIC_QRC"] = 'ON'
+        cmake.configure(source_dir='source')
+        return cmake
 
 
     def build(self):
-        folder_name = os.path.join("source", "qtpropertybrowser")
-        open(os.path.join(folder_name, "config.pri"), "w").write("SOLUTIONS_LIBRARY = yes")
-        tools.replace_in_file(os.path.join(folder_name, "qtpropertybrowser.pro"), 
-            """CONFIG += ordered""",
-            """CONFIG += ordered
-CONFIG += conan_basic_setup
-include(../../conanbuildinfo.pri)"""
+        tools.replace_in_file(os.path.join("source", "src", "CMakeLists.txt"),
+            """set(DESTDIR "${QT_INSTALL_QML}/${TARGETPATH}")""",
+            """set(DESTDIR "${CMAKE_INSTALL_PREFIX}/qml/${TARGETPATH}")""",
             )
-        self.run( "cd %s && qmake CONFIG+=debug_and_release" % folder_name, run_environment=True)
-        if self.settings.build_type == "Debug":
-            self.run( "cd %s && make debug" % folder_name, run_environment=True )
-        else:
-            self.run( "cd %s && make release" % folder_name, run_environment=True )
+        cmake = self._cmake_configure()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="*.h", dst="include", src=os.path.join("source", "qtpropertybrowser", "src"))
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
+        cmake = self._cmake_configure()
+        cmake.install()
+
+        # for now also copy examples
+        self.copy("*", dst="bin", src="bin")
+        self.copy("*.qrc", dst="samples", src=os.path.join(self.source_folder, "source", "samples"))
+        self.copy("*.qml", dst="samples", src=os.path.join(self.source_folder, "source", "samples"))
+        self.copy("*.jpeg", dst="samples", src=os.path.join(self.source_folder, "source", "samples"))
+        self.copy("*.jpg", dst="samples", src=os.path.join(self.source_folder, "source", "samples"))
+        self.copy("*.conf", dst="samples", src=os.path.join(self.source_folder, "source", "samples"))
+
+
         
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
