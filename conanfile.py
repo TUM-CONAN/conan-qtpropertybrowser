@@ -15,7 +15,7 @@ class QtPropertyBrowserConan(ConanFile):
     description = "collection of qt widgets"
 
     requires = (
-            "qt/5.12.4-r2@camposs/stable",
+            "qt/5.12.4-r5@camposs/stable",
     )
 
     scm = {
