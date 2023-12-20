@@ -22,7 +22,7 @@ class QtPropertyBrowserConan(ConanFile):
     }
 
     def requirements(self):
-        self.requires("qt/6.4.2@camposs/stable")
+        self.requires("qt/6.5.3@camposs/stable")
         # self.requires("libuuid/1.0.3")
         # self.requires("brotli/1.0.9")
         # self.requires("pcre2/10.42")
