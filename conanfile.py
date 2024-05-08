@@ -138,11 +138,8 @@ class QtPropertyBrowserConan(ConanFile):
         cmake = CMake(self)
         env = VirtualRunEnv(self)
         with env.vars().apply():
-            self._before_configure()
             cmake.configure()
-            self._before_build(cmake)
             cmake.build()
-            self._after_build()
 
     def package(self):
         cmake = CMake(self)
