@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import load, update_conandata, copy, replace_in_file, collect_libs
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 
 class QtPropertyBrowserConan(ConanFile):
@@ -22,7 +23,7 @@ class QtPropertyBrowserConan(ConanFile):
     }
 
     def requirements(self):
-        self.requires("qt/6.5.3@camposs/stable")
+        self.requires("qt/6.6.1@camposs/stable")
         # self.requires("libuuid/1.0.3")
         # self.requires("brotli/1.0.9")
         # self.requires("pcre2/10.42")
@@ -133,9 +134,15 @@ class QtPropertyBrowserConan(ConanFile):
         cmake_layout(self, src_folder="source_folder")
 
     def build(self):
+        # overwritten since capnp needs to be able to find its shared lib if build with_shared
         cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+        env = VirtualRunEnv(self)
+        with env.vars().apply():
+            self._before_configure()
+            cmake.configure()
+            self._before_build(cmake)
+            cmake.build()
+            self._after_build()
 
     def package(self):
         cmake = CMake(self)
